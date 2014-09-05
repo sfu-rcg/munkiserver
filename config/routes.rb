@@ -1,18 +1,25 @@
-Munki::Application.routes.draw do  
+Munki::Application.routes.draw do
+
+  namespace :api do
+    namespace :v1 do
+      resources :computers
+    end
+  end
+
   resources :units, :except => [:show] do
     member do
       get 'settings/edit' => 'unit_settings#edit'
       put 'settings' => 'unit_settings#update'
     end
   end
-  
+
   resources :users, :except => [:show]
-  
+
   # Session
   match '/login' => "sessions#new"
   match 'create_session' => 'sessions#create'
   match '/logout' => 'sessions#destroy'
-  
+
   # Computer checkin URL
   match 'checkin/:id' => 'computers#checkin', :via => :post
 
@@ -20,7 +27,7 @@ Munki::Application.routes.draw do
   match ':id.plist', :controller => 'computers', :action => 'show_plist', :format => 'manifest', :id => /[A-Za-z0-9_\-\.%:]+/, :as => "computer_manifest"
   match 'computers/:id.plist', :controller => 'computers', :action => 'show_plist', :format => 'manifest', :id => /[A-Za-z0-9_\-\.%:]+/
   match 'site_default', :controller => 'computers', :action => 'show_plist', :format => 'manifest', :id => '00:00:00:00:00:00', :as => "computer_manifest"
-  
+
   match 'pkgs/:id.json' => 'packages#download', :format => :json, :id => /[A-Za-z0-9_\-\.%]+/
   match 'catalogs/:unit_environment' => 'catalogs#show', :format => 'plist', :via => :get
   match 'pkgs/:id' => 'packages#download', :as => 'download_package', :id => /[A-Za-z0-9_\-\.%]+/
@@ -35,18 +42,18 @@ Munki::Application.routes.draw do
       get 'unit_change(.:format)', :action => "unit_change", :as => 'unit_change'
       get 'update_warranty', :action => "update_warranty", :as => 'update_warranty'
       get 'client_prefs', :on => :member, :as => "client_prefs"
-      
+
       collection do
         post :create_import#, :force_redirect
         put :update_multiple
         get :edit_multiple
       end
     end
-    
+
     controller :packages do
       match 'packages(.:format)', :action => 'index', :via => :get, :as => 'packages'
       match 'packages(.:format)', :action => 'create', :via => :post
-      
+
       scope '/packages' do
         match 'add(.:format)', :action => 'new', :via => :get, :as => 'new_package'
         match "shared/import_multiple_shared", :action => 'import_multiple_shared', :via => :put, :as => "import_multiple_shared_packages"
@@ -63,36 +70,36 @@ Munki::Application.routes.draw do
         end
       end
     end
-    
+
     controller :package_branches do
       scope "/packages" do
         match ":name(.:format)", :action => "edit", :via => :get, :as => "edit_package_branch"
         match ":name(.:format)", :action => 'update', :via => :put
       end
     end
-    
+
     resources :user_groups, :except => :show
-    
+
     resources :computer_groups do
       get 'environment_change(.:format)', :action => "environment_change", :as => 'environment_change'
     end
-    
+
     resources :bundles do
       get 'environment_change(.:format)', :action => "environment_change", :as => 'environment_change'
     end
-    
+
     match 'install_items/edit_multiple/:computer_id' => 'install_items#edit_multiple', :as => "edit_multiple_install_items", :via => :get
     match 'install_items/update_multiple' => 'install_items#update_multiple', :as => "update_multiple_install_items", :via => :put
   end
-  
+
   match 'dashboard' => "dashboard#index", :as => "dashboard"
   match 'dashboard/widget/:name' => 'dashboard#widget', :as => "widget"
   match 'dashboard/dismiss_manifest/:id' => 'dashboard#dismiss_manifest', :as => "dismiss_manifest"
-  
+
   match "permissions" => "permissions#index", :as => "permissions", :via => "GET"
   match "permissions/edit/:principal_pointer(/:unit_id)" => "permissions#edit", :as => "edit_permissions", :via => "GET"
   match "permissions" => "permissions#update", :as => "update_permissions", :via => "PUT"
-  
+
   # Redirect unit hostname to computer index
   match "/:unit_shortname" => redirect("/%{unit_shortname}/computers")
 
