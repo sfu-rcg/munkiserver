@@ -14,7 +14,7 @@ gem 'plist'
 gem 'cancan'
 gem 'highline'
 
-gem 'mysql2', '> 0.3'
+# gem 'mysql2', '> 0.3'
 gem 'taps'
 
 gem 'highcharts-rails', '~> 2.1.9'
