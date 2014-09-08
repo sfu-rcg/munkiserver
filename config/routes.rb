@@ -1,9 +1,8 @@
 Munki::Application.routes.draw do
 
-  namespace :api do
-    namespace :v1 do
-      resources :computers
-    end
+  namespace :api,  defaults: { format: 'json' } do
+    post 'register'     => 'registrations#register'
+    post 'decommission' => 'registrations#decommission'
   end
 
   resources :units, :except => [:show] do
