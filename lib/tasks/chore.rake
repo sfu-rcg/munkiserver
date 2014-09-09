@@ -1,4 +1,21 @@
 namespace :chore do
+
+  desc "Removes ManagedInstallReports created after 7 days ago, but keeps the last one a machine has"
+  task :cleanup_old_managed_install_reports_except_the_last_one => :environment do
+    old_reports_grouped_by_computer_id = ManageInstallReport.since(7.days.ago).order(:created_at).group_by {|report| report.computer_id }
+
+    report_counts = {}
+    Computer.all.each do |computer|
+      report_counts[computer.id] = computer.managed_install_reports.count
+    end
+
+    old_reports_grouped_by_computer_id.each do |computer_id, old_reports|
+      # save one report!
+      old_reports.pop if old_reports.count == report_counts[computer_id]
+      old_reports.each(&:destroy) 
+    end
+  end
+
   desc "Removes MissingManifests created after X days ago (defaults to 30 days)"  
   task :cleanup_missing_manifests, [:days_kept] => [:environment] do |t, args|
     args.with_defaults(:days_kept => 30)
@@ -8,7 +25,7 @@ namespace :chore do
   
   desc "Removes ManagedInstallReports created after X days ago (defaults to 30 days)"
   task :cleanup_old_managed_install_reports, [:days_kept] => [:environment] do |t, args|
-    args.with_defaults(:days_kept => 30)
+    args.with_defaults(:days_kept => 7)
     results = ManagedInstallReport.where("created_at < :date", :date => (Date.today - args[:days_kept].to_i.days)).destroy_all
     puts "Destroyed #{results.count} managed install reports"
   end
