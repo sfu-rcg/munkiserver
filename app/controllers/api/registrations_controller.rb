@@ -25,7 +25,7 @@ module Api
         :hostname    => validated['hostname']).where(
         :mac_address => validated['mac_address']).first
       respond_success
-      @computer.destroy
+      @computer.destroy if @computer
     end
 
     # Ensure only valid params are accepted and that required params
