@@ -1,4 +1,5 @@
 .bundle
+config/api.yaml
 config/settings.yaml
 config/database.yml
 *.DS_Store
