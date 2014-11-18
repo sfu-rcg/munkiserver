@@ -32,9 +32,9 @@ module Api
     # are present
     def validate_params(params, required)
       defaults = {
-        'computer_group_id' => 1,
-        'unit_id'           => 1,
-        'environment_id'    => 2,
+        'computer_group_id' => ComputerGroup.find_by_name('Default').id,
+        'unit_id'           => Unit.find_by_name('Default').id,
+        'environment_id'    => Environment.find_by_name('production').id,
       }
 
       filtered = params.select { |k,v| required.include?(k) }
